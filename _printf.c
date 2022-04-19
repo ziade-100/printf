@@ -1,47 +1,46 @@
 #include "main.h"
 
 /**
- * _printf - produces output according to a format
- * @format: format string containing the characters and the specifiers
- * Description: this function will call the get_print() function that will
- * determine which printing function to call depending on the conversion
- * specifiers contained into fmt
- * Return: length of the formatted output string
+ * _printf - prints anything
+ * @format: the format string
+ *
+ * Return: number of bytes printed
+ */
+#include "main.h"
+
+/**
+ * _printf - Function that prints formatted output.
+ *
+ * @format: a string composed of zero or more characters to print or use as
+ * directives that handle subsequent arguments and special characters.
+ *
+ * Description: This function can take a variable number and type of arguments
+ * that should be printed to standard output.
+ *
+ * Return: int
  */
 int _printf(const char *format, ...)
 {
-	int (*pfunc)(va_list, flags_t *);
-	const char *p;
-	va_list arguments;
-	flags_t flags = {0, 0, 0};
+    va_list args;
+    int i = 0, chars_printed = 0;
 
-	register int count = 0;
+    va_start(args, format);
+    while (format && format[i])
+    {
+        if (format[i] != '%')
+        {
+            chars_printed += _putchar(format[i]);
+        }
+        else if (format[i + 1])
+        {
+            i++;
+            if (format[i] == 'c' || format[i] == 's')
+                chars_printed += format[i] == 'c' ? _putchar(va_arg(args, int)) : print_string(va_arg(args, char *));
 
-	va_start(arguments, format);
-	if (!format || (format[0] == '%' && !format[1]))
-		return (-1);
-	if (format[0] == '%' && format[1] == ' ' && !format[2])
-		return (-1);
-	for (p = format; *p; p++)
-	{
-		if (*p == '%')
-		{
-			p++;
-			if (*p == '%')
-			{
-				count += _putchar('%');
-				continue;
-			}
-			while (get_flag(*p, &flags))
-				p++;
-			pfunc = get_print(*p);
-			count += (pfunc)
-				? pfunc(arguments, &flags)
-				: _printf("%%%c", *p);
-		} else
-			count += _putchar(*p);
-	}
-	_putchar(-1);
-	va_end(arguments);
-	return (count);
+            chars_printed += print_unknown_spec(format[i]);
+        }
+        i++;
+    }
+    va_end(args);
+    return (chars_printed);
 }
